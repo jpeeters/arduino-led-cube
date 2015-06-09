@@ -8,7 +8,7 @@
 *
 */
 
-// Betat-Machine Library
+// Beta Machine Library
 #include <LedCube.h>
 
 // Instanciate the class LedCube to make an objet cube.
