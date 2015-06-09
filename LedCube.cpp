@@ -1,9 +1,7 @@
 #include "Arduino.h"
 #include "LedCube.h"
 
-void
-LedCube::
-setupIO ()
+void LedCube::setupIO ()
 {
     int io;
     for ( io = 2; io <= 13; ++io )
@@ -13,73 +11,47 @@ setupIO ()
     }
 }
 
-void
-LedCube::
-setLed ( int led, bool state )
+void LedCube::setLed ( int led, bool ledState, int plane)
 {
     if ( led < 0 || led > 8 )
         return;
 
-    digitalWrite ( led + 2, state ? HIGH : LOW );
+    digitalWrite ( led + 2, ledState ? HIGH : LOW );
+    digitalWrite ( plane + 11, HIGH );
 }
 
-void
-LedCube::
-setPlane ( int plane, int state[9] )
+void LedCube::setPlane ( int plane[3], int ledState[9] )
 {
-    int io;
-
-    if ( plane < 0 || plane > 2 )
-        return;
-
-    for ( io = 2; io <= 10; ++io )
-        digitalWrite ( io, state[io-2] ? HIGH : LOW );
-
-    for ( io = 11; io <= 13; ++io )
-        digitalWrite ( io, plane + 11 == io ? HIGH : LOW );
+	int io;
+	
+	for(io = 0; io<3; io++)
+	{
+		if ( plane[io] < 0 || plane[io] > 2 )
+		return;
+	}
+	
+	for ( io = 2; io <= 10; ++io )
+		digitalWrite ( io, ledState[io-2] ? HIGH : LOW );
+		
+	for ( io = 0; io <= 2; ++io )
+		digitalWrite ( io + 11, plane[io] ? HIGH : LOW );
 }
 
-void
-LedCube::
-setAll ()
+void LedCube::setAll ()
 {
     int io;
     for ( io = 2; io <= 13; ++io )
         digitalWrite ( io, HIGH );
 }
 
-void
-LedCube::
-resetAll ()
+void LedCube::resetAll ()
 {
     int io;
     for ( io = 2; io <= 13; ++io )
         digitalWrite ( io, LOW );
 }
 
-void 
-LedCube::
-setOn(void)
-{
-	for(int cubePin = 2; cubePin < 14; cubePin++)
-	{
-		digitalWrite(cubePin, HIGH);
-	}
-}
-	
-void
-LedCube::
-setOff(void)
-{
-	for(int cubePin = 2; cubePin < 14; cubePin++)
-	{
-		digitalWrite(cubePin, LOW);
-	}
-}
-
-void
-LedCube::
-shadowOn(long tempo)
+void LedCube::shadowOn(long tempo)
 {
 	for(int cubePin = 2; cubePin < 14; cubePin++)
 	{
@@ -87,10 +59,8 @@ shadowOn(long tempo)
 		delay(tempo);
 	}
 }
-	
-void
-LedCube::
-shadowOff(long tempo)
+
+void LedCube::shadowOff(long tempo)
 {
 	for(int cubePin = 2; cubePin < 14; cubePin++)
 	{
@@ -99,222 +69,140 @@ shadowOff(long tempo)
 	}
 }
 
-void
-LedCube::
-lineWrite( int lineState[9])
+void LedCube::resetTop()
 {
-	for(int line = 0; line <= 8; line++)
-	{
-		digitalWrite(line + 2, lineState[line]);
-	}
+	digitalWrite(11, LOW);
 }
 
-void
-LedCube::
-layerWrite(int layerState[3])
-{
-	for(int layer = 0; layer <= 2; layer++)
-	{
-		digitalWrite(layer+11, layerState[layer]);
-	}
-}
-
-
-void
-LedCube::
-setTopOff(void)
-{
-	digitalWrite(PLAN2, LOW);
-}
-	
-
-void
-LedCube::
-setTopOn(void)
+void LedCube::setTop()
 {
 	int plan[3] = {1,0,0}; // top , midle, Bottom
-	int lineState[9] = {1, 1, 1, 1, 1, 1, 1, 1, 1}; 
-	layerWrite(plan);
-	lineWrite(lineState);
-}
-	
-void
-LedCube::
-setMidleOff(void)
-{
-	digitalWrite(PLAN1, LOW);
+	int ledState[9] = {1, 1, 1, 1, 1, 1, 1, 1, 1};
+	setPlane(plan, ledState);
 }
 
-void
-LedCube::
-setMidleOn(void)
+void LedCube::resetMidle()
+{
+	digitalWrite(12, LOW);
+}
+
+void LedCube::setMidle()
 {
 	int plan[3] = {0,1,0}; // top , midle, Bottom
-	int lineState[9] = {1, 1, 1, 1, 1, 1, 1, 1, 1}; 
-	layerWrite(plan);
-	lineWrite(lineState);
+	int ledState[9] = {1, 1, 1, 1, 1, 1, 1, 1, 1};
+	setPlane(plan, ledState);
 }
 
-void
-LedCube::
-setBottomOff(void)
+void LedCube::resetBottom()
 {
-	digitalWrite(PLAN0, LOW);
+	digitalWrite(13, LOW);
 }
-	
-void
-LedCube::
-setBottomOn(void)
+
+void LedCube::setBottom()
 {
 	int plan[3] = {0,0,1}; // top , midle, Bottom
-	int lineState[9] = {1, 1, 1, 1, 1, 1, 1, 1, 1}; 
-	layerWrite(plan);
-	lineWrite(lineState);
+	int ledState[9] = {1, 1, 1, 1, 1, 1, 1, 1, 1}; 
+	setPlane(plan, ledState);
 }
-	
-void
-LedCube::
-blink(long tempo, char blinkNbr)
+
+void LedCube::setFace1()
+{
+	int plan[3] = {1,1,1}; // Bottom, midle, top
+	int ledState[9] = {1, 1, 1, 0, 0, 0, 0, 0, 0}; 
+	setPlane(plan, ledState);
+}
+
+void LedCube::setFace2()
+{
+	int plan[3] = {1,1,1}; // Bottom, midle, top
+	int ledState[9] = {1, 0, 0, 1, 0, 0, 1, 0, 0}; 
+	setPlane(plan,ledState);
+}
+
+void LedCube::setFace3()
+{
+	int plan[3] = {1,1,1}; // Bottom, midle, top
+	int ledState[9] = {0, 0, 0, 0, 0, 0, 1, 1, 1}; 
+	setPlane(plan, ledState);
+}
+
+void LedCube::setFace4()
+{
+	int plan[3] = {1,1,1}; // Bottom, midle, top
+	int ledState[9] = {0, 0, 1, 0, 0, 1, 0, 0, 1}; 
+	setPlane(plan, ledState);
+}
+
+void LedCube::setAllFace()
+{
+	setFace1();
+	setFace2();
+	setFace3();
+	setFace4();
+}
+
+void LedCube::blink(long tempo, char blinkNbr)
 {
 	for(int i = 0; i < blinkNbr; i++)
 	{
-		setOn();
+		setAll();
 		delay(tempo);
-		setOff();
+		resetAll();
 		delay(tempo);
 	}	
 }
 
-void
-LedCube::
-circularDemo(long tempo)
+void LedCube::circularDemo(long tempo)
 {
-	int lineState1[9] = {1, 0, 0, 0, 0, 0, 0, 0, 0};
-	int lineState2[9] = {0, 1, 0, 0, 0, 0, 0, 0, 0};
-	int lineState3[9] = {0, 0, 1, 0, 0, 0, 0, 0, 0};
-	int lineState4[9] = {0, 0, 0, 0, 0, 1, 0, 0, 0};
-	int lineState5[9] = {0, 0, 0, 0, 0, 0, 0, 0, 1};
-	int lineState6[9] = {0, 0, 0, 0, 0, 0, 0, 1, 0};
-	int lineState7[9] = {0, 0, 0, 0, 0, 0, 1, 0, 0};
-	int lineState8[9] = {0, 0, 0, 1, 0, 0, 0, 0, 0};
-		
-	for(int i=0; i<3; i++)
+	int ledState1[8][9] =  {{1, 0, 0, 0, 0, 0, 0, 0, 0},
+				{0, 1, 0, 0, 0, 0, 0, 0, 0},
+				{0, 0, 1, 0, 0, 0, 0, 0, 0},
+				{0, 0, 0, 0, 0, 1, 0, 0, 0},
+				{0, 0, 0, 0, 0, 0, 0, 0, 1},
+				{0, 0, 0, 0, 0, 0, 0, 1, 0},
+				{0, 0, 0, 0, 0, 0, 1, 0, 0},
+				{0, 0, 0, 1, 0, 0, 0, 0, 0}};
+
+	int plane[3][3] = {{1, 0, 0}, {0, 1, 0}, {0, 0, 1}};
+
+	for(int planeIndex = 0; planeIndex <= 2; planeIndex++)
 	{
-		if(i == 0)
+		for(int ledIndex = 0; ledIndex <= 7; ledIndex++)
 		{
-			int plan[3] = {1,0,0};
-			layerWrite(plan);
+			setPlane(plane[planeIndex], ledState1[ledIndex]); delay(tempo);
 		}
-		
-		if(i == 1)
-		{
-			int plan[3] = {0,1,0};
-			layerWrite(plan);
-		}
-			
-		if(i == 2)
-		{
-			int plan[3] = {0,0,1};
-			layerWrite(plan);
-		}
-			
-		lineWrite(lineState1);delay(tempo);
-		lineWrite(lineState2);delay(tempo);
-		lineWrite(lineState3);delay(tempo);
-		lineWrite(lineState4);delay(tempo);
-		lineWrite(lineState5);delay(tempo);
-		lineWrite(lineState6);delay(tempo);
-		lineWrite(lineState7);delay(tempo);
-		lineWrite(lineState8);delay(tempo);
 	}
 }
 
-void
-LedCube::
-setFace1On(void)
+void LedCube::test(long tempo)
 {
-	int plan[3] = {1,1,1}; // Bottom, midle, top
-	int lineState[9] = {1, 1, 1, 0, 0, 0, 0, 0, 0}; 
-	layerWrite(plan);
-	lineWrite(lineState);
+	setFace1();delay(tempo);
+	setFace2();delay(tempo);
+	setFace3();delay(tempo);
+	setFace4();delay(tempo);
 }
 
-void
-LedCube::
-setFace2On(void)
+void LedCube::rotation(long tempo)
 {
-	int plan[3] = {1,1,1}; // Bottom, midle, top
-	int lineState[9] = {1, 0, 0, 1, 0, 0, 1, 0, 0}; 
-	layerWrite(plan);
-	lineWrite(lineState);
+
+	int plane[3] = {1,1,1}; // Bottom, midle, top
+	int ledState[4][9] =  {{1, 0, 0, 0, 1, 0, 0, 0, 1},
+				{0, 0, 0, 1, 1, 1, 0, 0, 0},
+				{0, 0, 1, 0, 1, 0, 1, 0, 0},
+				{0, 1, 0, 0, 1, 0, 0, 1, 0}};
+	for(int face = 0; face <= 3; face++)
+	{
+		setPlane(plane, ledState[face]);delay(tempo);
+	}
 }
 
-void
-LedCube::
-setFace3On(void)
-{
-	int plan[3] = {1,1,1}; // Bottom, midle, top
-	int lineState[9] = {0, 0, 0, 0, 0, 0, 1, 1, 1}; 
-	layerWrite(plan);
-	lineWrite(lineState);
-}
-
-void
-LedCube::
-setFace4On(void)
-{
-	int plan[3] = {1,1,1}; // Bottom, midle, top
-	int lineState[9] = {0, 0, 1, 0, 0, 1, 0, 0, 1}; 
-	layerWrite(plan);
-	lineWrite(lineState);
-}
-	
-void 
-LedCube::
-setAllFaceOn(void)
-{
-	setFace1On();
-	setFace2On();
-	setFace3On();
-	setFace4On();
-}
-
-void
-LedCube::
-test(long tempo)
-{
-	setFace1On();delay(tempo);
-	setFace2On();delay(tempo);
-	setFace3On();delay(tempo);
-	setFace4On();delay(tempo);
-}
-
-void 
-LedCube::
-rotation(long tempo)
-{
-	int plan[3] = {1,1,1}; // Bottom, midle, top
-	int lineState1[9] = {1, 0, 0, 0, 1, 0, 0, 0, 1};
-	int lineState2[9] = {0, 0, 0, 1, 1, 1, 0, 0, 0};
-	int lineState3[9] = {0, 0, 1, 0, 1, 0, 1, 0, 0};
-	int lineState4[9] = {0, 1, 0, 0, 1, 0, 0, 1, 0};
-		
-	layerWrite(plan);
-	lineWrite(lineState1);delay(tempo);
-	lineWrite(lineState2);delay(tempo);
-	lineWrite(lineState3);delay(tempo);
-	lineWrite(lineState4);delay(tempo);
-}
-
-void 
-LedCube::
-effect(long tempo, char nbr)
+void LedCube::effect(long tempo, char nbr)
 {
 	for(int i =0; i<nbr; i++)
 	{
-		setTopOn();delay(tempo);
-		setMidleOn();delay(tempo);
-		setBottomOn();delay(tempo);
-		setMidleOn();delay(tempo);
+		setTop();delay(tempo);
+		setMidle();delay(tempo);
+		setBottom();delay(tempo);
+		setMidle();delay(tempo);
 	}
 }
